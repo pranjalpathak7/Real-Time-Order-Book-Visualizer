@@ -2,7 +2,7 @@
 
 This is a high-performance, real-time stock order book visualizer built for the Two Cents Ventures frontend engineering assignment. It connects to the live Binance WebSocket API to stream and display market data for BTC/USDT.
 
-A live demo is hosted on Vercel: 
+A live demo is hosted on Vercel: [**https://real-time-order-book-visualizer.vercel.app/**](https://real-time-order-book-visualizer.vercel.app/)
 
 ## Features
 
