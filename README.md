@@ -30,8 +30,8 @@ A live demo is hosted on Vercel: [**https://real-time-order-book-visualizer.verc
 
 1.  **Clone the repository:**
     ```bash
-    git clone [your-repo-url]
-    cd [your-repo-name]
+    git clone https://github.com/2CentsCapitalHR/valura-frontend-assignment-pranjalpathak7/
+    cd valura-frontend-assignment-pranjalpathak7
     ```
 
 2.  **Install dependencies:**
