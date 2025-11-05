@@ -8,6 +8,12 @@ type HighlightDirection = 'buy' | 'sell' | 'none';
 const RecentTrades: React.FC = () => {
   const trades = useOrderBookStore((state: OrderBookState) => state.trades);
   
+  // 1. Get the current symbol from the store
+  const symbol = useOrderBookStore((state: OrderBookState) => state.symbol);
+  
+  // 2. Create the dynamic coin name (e.g., "BTC", "ETH")
+  const coinName = symbol.replace('usdt', '').toUpperCase();
+  
   const [highlightedRow, setHighlightedRow] = useState<HighlightDirection>('none');
   const lastTradeIdRef = useRef<number | null>(null);
 
@@ -34,7 +40,8 @@ const RecentTrades: React.FC = () => {
       <h3 className="text-lg font-bold mb-3 text-center flex-shrink-0">Recent Trades</h3>
       <div className="flex justify-between text-xs text-gray-400 mb-2 flex-shrink-0">
         <span className="w-1/3 text-center">Price (USDT)</span>
-        <span className="w-1/3 text-center">Amount (BTC)</span>
+        {/* 3. Make heading dynamic */}
+        <span className="w-1/3 text-center">Amount ({coinName})</span>
         <span className="w-1/3 text-center">Time</span>
       </div>
       <div className="flex-1 overflow-y-auto">

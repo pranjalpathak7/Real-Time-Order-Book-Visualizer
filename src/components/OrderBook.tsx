@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import { useOrderBookStore, OrderBookState } from '@/store/useOrderBookStore';
 import OrderBookRow from './OrderBookRow';
 
-// Helper function
+// Helper function (no change)
 const processBookData = (book: Map<string, string>, sortOrder: 'asc' | 'desc') => {
   const entries = Array.from(book.entries());
   
@@ -30,6 +30,12 @@ const processBookData = (book: Map<string, string>, sortOrder: 'asc' | 'desc') =
 const OrderBook: React.FC = () => {
   const bids = useOrderBookStore((state: OrderBookState) => state.bids);
   const asks = useOrderBookStore((state: OrderBookState) => state.asks);
+  
+  // 1. Get the current symbol from the store
+  const symbol = useOrderBookStore((state: OrderBookState) => state.symbol);
+  
+  // 2. Create the dynamic coin name (e.g., "BTC", "ETH")
+  const coinName = symbol.replace('usdt', '').toUpperCase();
 
   const { processedData: processedBids } = useMemo(
     () => processBookData(bids, 'desc'),
@@ -69,8 +75,10 @@ const OrderBook: React.FC = () => {
           <h2 className="text-lg font-semibold text-green-500 mb-2 text-center">Bids (BUY)</h2>
           <div className="flex justify-between text-xs text-gray-400 mb-2">
             <span className="w-1/3 text-center">Price (USDT)</span>
-            <span className="w-1/3 text-center">Amount (BTC)</span>
-            <span className="w-1/3 text-center">Total (BTC)</span>
+            {/* 3. Make heading dynamic */}
+            <span className="w-1/3 text-center">Amount ({coinName})</span>
+            {/* 4. Make heading dynamic and fix typo */}
+            <span className="w-1/3 text-center">Total ({coinName})</span>
           </div>
           <div>
             {visibleBids.map(({ price, amount, total }) => (
@@ -91,8 +99,10 @@ const OrderBook: React.FC = () => {
           <h2 className="text-lg font-semibold text-red-500 mb-2 text-center">Asks (SELL)</h2>
           <div className="flex justify-between text-xs text-gray-400 mb-2">
             <span className="w-1/3 text-center">Price (USDT)</span>
-            <span className="w-1G2 text-center">Amount (BTC)</span>
-            <span className="w-1/3 text-center">Total (BTC)</span>
+            {/* 5. Make heading dynamic */}
+            <span className="w-1/3 text-center">Amount ({coinName})</span>
+            {/* 6. Make heading dynamic and fix typo */}
+            <span className="w-1/3 text-center">Total ({coinName})</span>
           </div>
           <div>
             {visibleAsks.map(({ price, amount, total }) => (
