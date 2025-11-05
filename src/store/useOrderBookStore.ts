@@ -14,11 +14,13 @@ export interface Trade {
 
 // Define the state structure
 export interface OrderBookState {
+  symbol: string; // NEW: The current trading pair
   bids: Map<string, string>;
   asks: Map<string, string>;
   trades: Trade[];
   connectionStatus: 'connecting' | 'connected' | 'disconnected';
   actions: {
+    setSymbol: (symbol: string) => void; // NEW: Action to change symbol
     setConnectionStatus: (status: OrderBookState['connectionStatus']) => void;
     handleOrderBookDelta: (delta: { b: OrderBookEntry[], a: OrderBookEntry[] }) => void;
     addTrade: (trade: Trade) => void;
@@ -40,11 +42,14 @@ const updateBook = (book: Map<string, string>, deltaEntries: OrderBookEntry[]) =
 };
 
 export const useOrderBookStore = create<OrderBookState>((set) => ({
+  symbol: 'btcusdt', // NEW: Default symbol
   bids: new Map<string, string>(),
   asks: new Map<string, string>(),
   trades: [],
   connectionStatus: 'connecting',
   actions: {
+    setSymbol: (symbol) => set({ symbol }), // NEW: setSymbol action
+
     setConnectionStatus: (status) => set({ connectionStatus: status }),
 
     handleOrderBookDelta: (delta) => {
@@ -60,6 +65,7 @@ export const useOrderBookStore = create<OrderBookState>((set) => ({
       });
     },
 
+    // Kept your improved addTrade function
     addTrade: (trade) => {
       set((state) => {
         // Prevent duplicate trades by checking if trade ID already exists
