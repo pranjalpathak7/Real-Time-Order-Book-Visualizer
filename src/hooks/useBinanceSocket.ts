@@ -1,25 +1,34 @@
 import { useEffect, useRef } from 'react';
-import { useOrderBookStore } from '@/store/useOrderBookStore'; // Use the base store
+import { useOrderBookStore, Trade } from '@/store/useOrderBookStore'; // Use the base store
 
-// (or 'wss://data-stream.binance.com/stream')
 const BINANCE_WS_URL = 'wss://data-stream.binance.com/stream'; 
 
-// 1. Accept 'symbol' as an argument
 export const useBinanceSocket = (symbol: string) => {
   const ws = useRef<WebSocket | null>(null);
   const actionsRef = useRef<ReturnType<typeof useOrderBookStore.getState>['actions'] | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isConnectingRef = useRef<boolean>(false);
   
-  // 2. 'isInitialConnectionRef' is removed, as we initialize every time
-  //    the symbol changes and 'connect' is called.
+  // 1. NEW: Create a buffer for trades
+  const tradeBufferRef = useRef<Trade[]>([]);
+  // 2. NEW: Create a ref for the interval timer
+  const flushIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 3. 'symbol' is added to the dependency array at the bottom
   useEffect(() => {
-    // Get actions inside useEffect
     actionsRef.current = useOrderBookStore.getState().actions;
+    const actions = actionsRef.current;
     
     let isMounted = true; 
+
+    // 3. NEW: Set up a buffer flusher that runs every 200ms
+    flushIntervalRef.current = setInterval(() => {
+      if (isMounted && actionsRef.current && tradeBufferRef.current.length > 0) {
+        // Send the entire buffer to the store
+        actionsRef.current.addTrades(tradeBufferRef.current);
+        // Clear the buffer
+        tradeBufferRef.current = [];
+      }
+    }, 200); // <-- Batching interval
 
     const connect = () => {
       
@@ -42,23 +51,19 @@ export const useBinanceSocket = (symbol: string) => {
       }
 
       isConnectingRef.current = true;
-      const actions = actionsRef.current;
-
-      // 4. Always initialize the store on a new connection attempt
       actions.initializeStore();
       actions.setConnectionStatus('connecting');
 
-      // 5. Use the dynamic 'symbol' prop
       const streams = [
-        `${symbol}@depth`,    // Order Book Deltas
-        `${symbol}@aggTrade`  // Aggregate Trades
+        `${symbol}@depth`,
+        `${symbol}@aggTrade`
       ];
       
       const socket = new WebSocket(`${BINANCE_WS_URL}?streams=${streams.join('/')}`);
 
       socket.onopen = () => {
         if (!isMounted || !actionsRef.current) return;
-        console.log(`WebSocket connection established for ${symbol}`); // Added symbol
+        console.log(`WebSocket connection established for ${symbol}`);
         isConnectingRef.current = false;
         actionsRef.current.setConnectionStatus('connected');
       };
@@ -69,11 +74,11 @@ export const useBinanceSocket = (symbol: string) => {
         try {
           const message = JSON.parse(event.data);
           
-          // 6. Use the dynamic 'symbol' prop
           if (message.stream === `${symbol}@depth`) {
             actionsRef.current.handleOrderBookDelta(message.data);
           } else if (message.stream === `${symbol}@aggTrade`) {
-            actionsRef.current.addTrade(message.data);
+            // 4. CHANGED: Push to buffer instead of calling action directly
+            tradeBufferRef.current.push(message.data);
           }
         } catch (error) {
           console.error('Error parsing WebSocket message:', error);
@@ -91,7 +96,7 @@ export const useBinanceSocket = (symbol: string) => {
 
       socket.onclose = () => {
         if (!isMounted) return;
-        console.log(`WebSocket connection closed for ${symbol}`); // Added symbol
+        console.log(`WebSocket connection closed for ${symbol}`);
         isConnectingRef.current = false;
         if (actionsRef.current) {
           actionsRef.current.setConnectionStatus('disconnected');
@@ -110,15 +115,20 @@ export const useBinanceSocket = (symbol: string) => {
       ws.current = socket;
     };
 
-    // Initial connection
     connect();
 
     // Cleanup function
     return () => {
-      console.log(`Cleaning up WebSocket for ${symbol} (unmounting)`); // Added symbol
+      console.log(`Cleaning up WebSocket for ${symbol} (unmounting)`);
       isMounted = false;
       isConnectingRef.current = false;
       
+      // 5. NEW: Clear the interval timer on cleanup
+      if (flushIntervalRef.current) {
+        clearInterval(flushIntervalRef.current);
+        flushIntervalRef.current = null;
+      }
+
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
@@ -136,6 +146,5 @@ export const useBinanceSocket = (symbol: string) => {
       actionsRef.current = null;
     };
     
-  // 7. Add 'symbol' to dependency array. This is the key change.
-  }, [symbol]);
+  }, [symbol]); // This is correct
 };

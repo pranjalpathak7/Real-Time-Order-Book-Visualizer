@@ -14,16 +14,16 @@ export interface Trade {
 
 // Define the state structure
 export interface OrderBookState {
-  symbol: string; // NEW: The current trading pair
+  symbol: string;
   bids: Map<string, string>;
   asks: Map<string, string>;
   trades: Trade[];
   connectionStatus: 'connecting' | 'connected' | 'disconnected';
   actions: {
-    setSymbol: (symbol: string) => void; // NEW: Action to change symbol
+    setSymbol: (symbol: string) => void;
     setConnectionStatus: (status: OrderBookState['connectionStatus']) => void;
     handleOrderBookDelta: (delta: { b: OrderBookEntry[], a: OrderBookEntry[] }) => void;
-    addTrade: (trade: Trade) => void;
+    addTrades: (trades: Trade[]) => void; // CHANGED: from addTrade to addTrades
     initializeStore: () => void;
   };
 }
@@ -32,58 +32,65 @@ export interface OrderBookState {
 const updateBook = (book: Map<string, string>, deltaEntries: OrderBookEntry[]) => {
   deltaEntries.forEach(([price, amount]) => {
     if (parseFloat(amount) === 0) {
-      // Amount is '0', so remove this price level
       book.delete(price);
     } else {
-      // Add or update the price level
       book.set(price, amount);
     }
   });
 };
 
 export const useOrderBookStore = create<OrderBookState>((set) => ({
-  symbol: 'btcusdt', // NEW: Default symbol
+  symbol: 'btcusdt',
   bids: new Map<string, string>(),
   asks: new Map<string, string>(),
   trades: [],
   connectionStatus: 'connecting',
   actions: {
-    setSymbol: (symbol) => set({ symbol }), // NEW: setSymbol action
+    setSymbol: (symbol) => set({ symbol }),
 
     setConnectionStatus: (status) => set({ connectionStatus: status }),
 
     handleOrderBookDelta: (delta) => {
       set((state) => {
-        // Create new maps to ensure immutability and trigger re-renders
         const newBids = new Map(state.bids);
         const newAsks = new Map(state.asks);
-
         updateBook(newBids, delta.b);
         updateBook(newAsks, delta.a);
-
         return { bids: newBids, asks: newAsks };
       });
     },
 
-    // Kept your improved addTrade function
-    addTrade: (trade) => {
+    // NEW: Batch-processing addTrades function
+    addTrades: (trades) => {
       set((state) => {
-        // Prevent duplicate trades by checking if trade ID already exists
-        const existingTradeIndex = state.trades.findIndex(t => t.a === trade.a);
-        
-        // If trade already exists, don't add it again
-        if (existingTradeIndex !== -1) {
-          return state; // Return unchanged state to prevent re-render
+        // Create a new array from existing trades
+        const newTrades = [...state.trades];
+        let added = false;
+
+        // Iterate new trades (which are already in order)
+        for (const trade of trades) {
+          // Check if this trade ID already exists
+          const existing = newTrades.find(t => t.a === trade.a);
+          
+          if (!existing) {
+            // Add new trade to the front
+            newTrades.unshift(trade);
+            added = true;
+          }
         }
-        
-        // Add new trade to the front and keep only the last 50 trades
+
+        // If no new trades were actually added, don't update state
+        if (!added) {
+          return state;
+        }
+
+        // Return the new, sliced array
         return {
-          trades: [trade, ...state.trades].slice(0, 50),
+          trades: newTrades.slice(0, 50),
         };
       });
     },
 
-    // Action to clear the store, e.g., on disconnect or symbol change
     initializeStore: () => {
       set({
         bids: new Map<string, string>(),
