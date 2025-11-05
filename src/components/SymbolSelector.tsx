@@ -12,12 +12,11 @@ const SYMBOLS = [
 ];
 
 const SymbolSelector: React.FC = () => {
-  // Get the current symbol and the action to set it
   const currentSymbol = useOrderBookStore((state: OrderBookState) => state.symbol);
   const setSymbol = useOrderBookStore((state: OrderBookState) => state.actions.setSymbol);
 
   return (
-    <div className="flex justify-center gap-2 mb-6">
+    <div className="flex justify-center gap-2 mb-4">
       {SYMBOLS.map((symbol) => {
         const isActive = currentSymbol === symbol.key;
         return (
@@ -25,11 +24,13 @@ const SymbolSelector: React.FC = () => {
             key={symbol.key}
             onClick={() => setSymbol(symbol.key)}
             className={`
-              px-4 py-2 rounded-lg font-semibold transition-all
+              px-3 py-1 rounded-md text-sm font-medium
+              transition-all
               ${isActive
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-blue-600 text-white shadow-md' // Active button: blue, white text, and a shadow
+                : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200' // Inactive button: darker gray
               }
+              focus:outline-none focus:ring-2 focus:ring-blue-500
             `}
           >
             {symbol.name}/USDT
