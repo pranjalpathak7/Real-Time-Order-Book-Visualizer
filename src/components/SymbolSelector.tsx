@@ -16,7 +16,7 @@ const SymbolSelector: React.FC = () => {
   const setSymbol = useOrderBookStore((state: OrderBookState) => state.actions.setSymbol);
 
   return (
-    <div className="flex justify-center gap-2 mb-4">
+    <div className="flex justify-center gap-1.5 sm:gap-2 flex-wrap">
       {SYMBOLS.map((symbol) => {
         const isActive = currentSymbol === symbol.key;
         return (
@@ -24,7 +24,7 @@ const SymbolSelector: React.FC = () => {
             key={symbol.key}
             onClick={() => setSymbol(symbol.key)}
             className={`
-              px-3 py-1 rounded-md text-sm font-medium
+              px-2.5 sm:px-3 py-1 rounded-md text-xs sm:text-sm font-medium
               transition-all
               ${isActive
                 ? 'bg-blue-600 text-white shadow-md' // Active button: blue, white text, and a shadow

@@ -64,16 +64,16 @@ const OrderBook: React.FC = () => {
   const maxVisibleAskTotal = parseFloat(visibleAsks[visibleAsks.length - 1]?.total || '0');
 
   return (
-    <div className="bg-gray-900 text-white p-4 rounded-lg shadow-lg w-full font-mono">
-      <div className="text-center text-xl font-bold mb-4">
+    <div className="bg-gray-900 text-white p-3 sm:p-4 lg:p-4 rounded-lg shadow-lg w-full font-mono">
+      <div className="text-center text-base sm:text-lg lg:text-xl font-bold mb-3 sm:mb-4 lg:mb-4">
         Spread: {spread}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-4">
         {/* BIDS (Left Column) */}
         <div>
-          <h2 className="text-lg font-semibold text-green-500 mb-2 text-center">Bids (BUY)</h2>
-          <div className="flex justify-between text-xs text-gray-400 mb-2">
+          <h2 className="text-base sm:text-lg lg:text-lg font-semibold text-green-500 mb-2 text-center">Bids (BUY)</h2>
+          <div className="flex justify-between text-[10px] sm:text-xs lg:text-xs text-gray-400 mb-2">
             <span className="w-1/3 text-center">Price (USDT)</span>
             {/* 3. Make heading dynamic */}
             <span className="w-1/3 text-center">Amount ({coinName})</span>
@@ -96,8 +96,8 @@ const OrderBook: React.FC = () => {
 
         {/* ASKS (Right Column) */}
         <div>
-          <h2 className="text-lg font-semibold text-red-500 mb-2 text-center">Asks (SELL)</h2>
-          <div className="flex justify-between text-xs text-gray-400 mb-2">
+          <h2 className="text-base sm:text-lg lg:text-lg font-semibold text-red-500 mb-2 text-center">Asks (SELL)</h2>
+          <div className="flex justify-between text-[10px] sm:text-xs lg:text-xs text-gray-400 mb-2">
             <span className="w-1/3 text-center">Price (USDT)</span>
             {/* 5. Make heading dynamic */}
             <span className="w-1/3 text-center">Amount ({coinName})</span>

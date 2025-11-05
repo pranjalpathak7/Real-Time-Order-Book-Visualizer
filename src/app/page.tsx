@@ -37,26 +37,26 @@ export default function Home() {
 
   return (
     <main
-      className={`flex h-screen flex-col items-center p-8 font-sans`}
+      className={`flex min-h-screen lg:h-screen flex-col items-center p-4 sm:p-6 lg:p-8 font-sans`}
     >
-      <div className="w-full max-w-7xl z-10 flex flex-col h-full">
-        <header className="flex flex-col sm:flex-row justify-between items-center mb-4 flex-shrink-0">
-          <h1 className="text-3xl font-bold mb-2 sm:mb-0">
+      <div className="w-full max-w-7xl z-10 flex flex-col lg:h-full">
+        <header className="flex flex-col sm:flex-row justify-between items-center mb-3 sm:mb-4 lg:flex-shrink-0">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-0">
             {displaySymbol} Order Book
           </h1>
           <ConnectionStatus />
         </header>
 
-        <div className="flex-shrink-0">
+        <div className="lg:flex-shrink-0 mb-3 sm:mb-4">
           <SymbolSelector />
         </div>
 
         {/* CHANGED: Removed mt-4 to pull the components up */}
-        <div className="flex flex-col lg:flex-row gap-8 flex-1 min-h-0">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8 lg:flex-1 lg:min-h-0">
           <div className="lg:flex-1">
             <OrderBook />
           </div>
-          <div className="w-full lg:w-[384px] flex flex-col">
+          <div className="w-full lg:w-[384px] flex flex-col lg:min-h-0">
             <RecentTrades />
           </div>
         </div>
